@@ -5,7 +5,7 @@
 
 # ## Аналитическое решение задачи разделения точек на плоскости
 
-# In[3]:
+# In[1]:
 
 #подключаем необходимые библиотеки
 
@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 # Для начала нам нужно создать данные - два облака точек. В коде я использую константы: размер области, в которой строятся графики/рисуются точки, сигму - дисперсию нормального распределения, и количество точек в каждом из облаков.
 
-# In[ ]:
+# In[30]:
 
 AXIS_RANGE = 10
 SIGMA = 3
@@ -27,7 +27,7 @@ CLUSTER_SIZE = 1000
 
 # Функция make_two_clusters создает два облака точек размера CLUSTER_SIZE каждое, центр первого в точке (AXIS_RANGE/3, AXIS_RANGE/3), т.е. в верхней правой четверти, центр второго симметричен относительно точки начала координат. Координаты точек и метки кластеров построчно записываются в матрицы X и Y, сначала точки первого облака, затем второго.
 
-# In[4]:
+# In[29]:
 
 def make_two_clusters(SIGMA, AXIS_RANGE, CLUSTER_SIZE):
     ones_column = np.ones((CLUSTER_SIZE, 1))
@@ -38,7 +38,7 @@ def make_two_clusters(SIGMA, AXIS_RANGE, CLUSTER_SIZE):
 
 # Функция draw_2d_points рисует точки на плоскости (преполагается, что сначала идут CLUSTER_SIZE точек первого облака, затем точки второго облака)
 
-# In[6]:
+# In[36]:
 
 def draw_2d_points(X, CLUSTER_SIZE, SIGMA, AXIS_RANGE):
     plt.grid(True)
@@ -50,7 +50,7 @@ def draw_2d_points(X, CLUSTER_SIZE, SIGMA, AXIS_RANGE):
 
 # Фукнция solve_least_squares возвращает вектор весов - аналитическое решение задачи минимизации метрики наименьших квадратов
 
-# In[9]:
+# In[31]:
 
 def solve_least_squares(X, Y):
     trans_X = X.transpose()
@@ -58,14 +58,14 @@ def solve_least_squares(X, Y):
     return weights
 
 
-# Функция draw_splitter рисует разделяющую прямую (используются точки, "иксы" которых -AXIS_RANGE и AXIS_RANGE)
+# In[44]:
 
-# In[8]:
-
-def draw_splitter(w, AXIS_RANGE, line_color, line_label=""):
+def draw_splitter(w, AXIS_RANGE, line_color, line_label="", LINESTYLE='--', ALPHA = 1.0):
     plt.plot([-AXIS_RANGE, AXIS_RANGE], [(AXIS_RANGE * w[1] + w[2])/w[0], (-AXIS_RANGE * w[1] + w[2])/w[0]],
-             label=line_label, color=line_color, linestyle='--')
+             label=line_label, color=line_color, linestyle=LINESTYLE, alpha=ALPHA)
 
+
+# Функция draw_splitter рисует разделяющую прямую (используются точки, "иксы" которых -AXIS_RANGE и AXIS_RANGE)
 
 # Теперь само тело программы
 
@@ -309,7 +309,7 @@ plt.show()
 
 # Для начала напишем функцию подсчета градиента, сгенерируем данные и зададим погрешность
 
-# In[414]:
+# In[34]:
 
 AXIS_RANGE = 10
 SIGMA = 3
@@ -333,7 +333,7 @@ X, Y = make_two_clusters(SIGMA, AXIS_RANGE, CLUSTER_SIZE)
 # | 0.001  | 195              |
 # | 0.0001 | 1964             |
 
-# In[424]:
+# In[47]:
 
 # Простой градиентный спуск
 LMBD = 0.05
@@ -350,14 +350,21 @@ while np.linalg.norm(grad) > EPS:
     w -= LMBD*grad
 
 draw_2d_points(X, CLUSTER_SIZE, SIGMA, AXIS_RANGE)
-draw_splitter(w, AXIS_RANGE, 'k')
+draw_splitter(w, AXIS_RANGE, 'k', line_label='grad descent')
 
-mistake = np.linalg.norm(solve_least_squares(X, Y) - w)
+exactSolution = solve_least_squares(X, Y)
+draw_splitter(exactSolution, AXIS_RANGE, 'm', line_label='exact solution', LINESTYLE='solid', ALPHA = 0.5)
+
+mistake = np.linalg.norm(exactSolution - w)
+plt.legend(loc='upper left')
+
 plt.xlabel("mistake is " + str(mistake) + ", " + str(stepCounter) + " steps")
 
 plt.show()
 
 
+# Разделяющие линии почти совпадают
+# 
 # Изображаем график зависимости ошибки от шага
 
 # In[416]:
@@ -396,12 +403,14 @@ plt.show()
 
 
 # На тех же данных обычный спуск делает 14 шагов, наискорейший - 3. Благодаря тому, что для нашей метрики существует явное решение задачи линейной оптимизации, с каждым шагом мы эффективно приближаемся к точке минимума, когда как обычный спуск после 3 шага хотя почти и не изменяется, но условие остановки не выполняется
+# 
+# Если какие-то из столбцов разрежены, то обычный градиентный спуск на соответствующих признаках будет сходиться намного медленнее, чем на плотных, т.к. градиент по таким признакам мал, что замедлит спуск в общем.
 
 # ## Стохастический градиентный спуск
 
 # Для начала считываем данные о рукописных цифрах и оставляем только те, которые касаются 0 и 1. Для единиц мы оставляем метку 1, а нулям присваиваем метку -1.
 
-# In[4]:
+# In[2]:
 
 def get_data():
     data = np.genfromtxt('train.csv', delimiter=',')
@@ -420,12 +429,17 @@ data = get_data()
 # 
 # Между прогонами я перемешиваю выборку, чтобы элементы из конца, не попавшие в батч, попали в него на следующем прогоне.
 
-# In[5]:
+# In[21]:
 
 def logistic_grad(w, train_set):
     X = train_set[:, 1:]
     Y = train_set[:, 0]
-    temp = np.exp(np.multiply(-Y, X.dot(w)))
+    temp = np.multiply(-Y, X.dot(w))
+    #anti-overflow
+    for x in temp :
+        if x > 22:
+            x = 22
+    temp = np.exp(temp)
     temp = np.divide(temp, temp + 1)
     temp = np.multiply(temp, -Y)
     return np.divide(temp.dot(X), len(train_set))
@@ -436,7 +450,7 @@ def logistic_loss(w, train_set):
     temp = np.log(np.exp(np.multiply(-Y, X.dot(w))) + 1)
     return np.sum(temp) / len(train_set)
 
-def kaggle_descent(train_set, BUTCH_SIZE, LMBD, EPS):
+def kaggle_descent(train_set, BATCH_SIZE, LMBD, EPS):
     w = np.zeros(785)
     step = 0
     previous_w = w + EPS;
@@ -445,10 +459,10 @@ def kaggle_descent(train_set, BUTCH_SIZE, LMBD, EPS):
         temp_position = 0
         previous_w = np.copy(w)
         step += 1
-        while temp_position + BUTCH_SIZE < len(train_set):
-            grad = logistic_grad(w, train_set[temp_position : temp_position + BUTCH_SIZE])
+        while temp_position + BATCH_SIZE < len(train_set):
+            grad = logistic_grad(w, train_set[temp_position : temp_position + BATCH_SIZE])
             w -= LMBD * grad
-            temp_position += BUTCH_SIZE
+            temp_position += BATCH_SIZE
     return w, step
 
 def count_mistakes(w, test_set):
@@ -462,13 +476,13 @@ def count_mistakes(w, test_set):
 
 TEST_SET_SIZE = 2500
 train_set, test_set = data[:-TEST_SET_SIZE], data[-TEST_SET_SIZE:]
-BUTCH_SIZE = 100
+BATCH_SIZE = 100
 LMBD = 1e-4
 EPS = 1e-5
 
-w, stepCounter = kaggle_descent(train_set, BUTCH_SIZE, LMBD, EPS)
+w, stepCounter = kaggle_descent(train_set, BATCH_SIZE, LMBD, EPS)
 mistakeCounter = count_mistakes(w, test_set)
-print("butch size is ", BUTCH_SIZE, ", ", mistakeCounter, "/", len(test_set), " mistakes, ", stepCounter, " steps")
+print("batch size is ", BATCH_SIZE, ", ", mistakeCounter, "/", len(test_set), " mistakes, ", stepCounter, " steps")
 
 
 # ### Зависимость количества прогонов и числа ошибок от размера батча
@@ -600,7 +614,7 @@ plt.show()
 
 # ## Adagrad
 
-# Будем хранить только диагональ матрицы G в виде вектора, тогда градиент перед домножением на лямбду будет просто покоординатно делиться на квадратный корень из diag_G
+# Будем хранить только диагональ матрицы G в виде вектора (gradsSquares), тогда градиент перед домножением на лямбду будет просто покоординатно делиться на квадратный корень из gradsSquares
 
 # In[426]:
 
@@ -609,38 +623,37 @@ def make_g(grad):
     g_col = np.array(g_row.transpose())
     return g_col.dot(g_row)
 
-def kaggle_adagrad_descent(train_set, BUTCH_SIZE, LMBD, EPS):
+def kaggle_adagrad_descent(train_set, BATCH_SIZE, LMBD, EPS):
     w = np.zeros(785)
     step = 0
     previous_w = w + EPS;
-    diag_G = np.zeros(785)
+    gradsSquares = np.zeros(785)
     while abs(logistic_loss(w, train_set) - logistic_loss(previous_w, train_set)) > EPS:
         np.random.shuffle(train_set)
         temp_position = 0
         previous_w = np.copy(w)
         step += 1
-        #print(diag_G)
-        while temp_position + BUTCH_SIZE < len(train_set):
-            grad = logistic_grad(w, train_set[temp_position : temp_position + BUTCH_SIZE])
-            diag_G += np.square(grad)
-            grad = np.divide(grad, np.sqrt(diag_G) + EPS)
+        while temp_position + BATCH_SIZE < len(train_set):
+            grad = logistic_grad(w, train_set[temp_position : temp_position + BATCH_SIZE])
+            gradsSquares += np.square(grad)
+            grad = np.divide(grad, np.sqrt(gradsSquares) + EPS)
             w -= LMBD * grad
             
-            temp_position += BUTCH_SIZE
+            temp_position += BATCH_SIZE
     return w, step
 
 TEST_SET_SIZE = 2500
 train_set, test_set = data[:-TEST_SET_SIZE], data[-TEST_SET_SIZE:]
-BUTCH_SIZE = 100
+BATCH_SIZE = 100
 LMBD = 1e-4
 EPS = 1e-5
-print("Butch size is ", BUTCH_SIZE)
+print("Batch size is ", BATCH_SIZE)
 
-w1, stepCounter1 = kaggle_adagrad_descent(train_set, BUTCH_SIZE, LMBD, EPS)
+w1, stepCounter1 = kaggle_adagrad_descent(train_set, BATCH_SIZE, LMBD, EPS)
 mistakeCounter1 = count_mistakes(w1, test_set)
 print( "Adagrad:           ", mistakeCounter1, "/", len(test_set), " mistakes, ", stepCounter1, " steps")
 
-w2, stepCounter2 = kaggle_descent(train_set, BUTCH_SIZE, LMBD, EPS)
+w2, stepCounter2 = kaggle_descent(train_set, BATCH_SIZE, LMBD, EPS)
 mistakeCounter2 = count_mistakes(w2, test_set)
 print( "Stochastic descent: ", mistakeCounter2, "/", len(test_set), " mistakes, ", stepCounter2, " steps")
 
@@ -657,27 +670,27 @@ train_set, test_set = data[:-TEST_SET_SIZE], data[-TEST_SET_SIZE:]
 LMBD = 1e-4
 EPS = 1e-5
 
-BUTCH_SIZE = 1
+BATCH_SIZE = 1
 
-butchSizes = []
+batchSizes = []
 adagradPlot = []
 stochasticPlot = []
 testQuantity = 5
 
-while BUTCH_SIZE < 5000:
+while BATCH_SIZE < 5000:
     adagradSteps = 0
     stochasticSteps = 0
     for i in range(testQuantity):
-        w1, stepCounter1 = kaggle_adagrad_descent(train_set, BUTCH_SIZE, 100 * LMBD, EPS)
+        w1, stepCounter1 = kaggle_adagrad_descent(train_set, BATCH_SIZE, 100 * LMBD, EPS)
         adagradSteps += stepCounter1
         
-        w2, stepCounter2 = kaggle_descent(train_set, BUTCH_SIZE, LMBD, EPS)
+        w2, stepCounter2 = kaggle_descent(train_set, BATCH_SIZE, LMBD, EPS)
         stochasticSteps += stepCounter2
         
-    butchSizes.append(BUTCH_SIZE)
+    batchSizes.append(BATCH_SIZE)
     adagradPlot.append(adagradSteps / testQuantity)
     stochasticPlot.append(stochasticSteps / testQuantity)
-    BUTCH_SIZE *= 2
+    BATCH_SIZE *= 2
 
 
 # Нарисуем графики: по x отложим логарифм размера батча (степень двойки), по y - количество шагов.
@@ -686,7 +699,7 @@ while BUTCH_SIZE < 5000:
 
 plt.bar(np.array(range(13)) - 0.25, adagradPlot, label='Adagrad', width=0.4)
 plt.bar(np.array(range(13)) + 0.25, stochasticPlot, color='c', label='Stochastic descent', align='center', width=0.4)
-plt.xlabel("log(butch size)")
+plt.xlabel("log(batch size)")
 plt.ylabel("number of steps")
 plt.legend(loc='upper left')
 
@@ -701,23 +714,23 @@ plt.show()
 
 # In[325]:
 
-def kaggle_RMSprop(train_set, BUTCH_SIZE, GAMMA, LMBD, EPS):
+def kaggle_RMSprop(train_set, BATCH_SIZE, GAMMA, LMBD, EPS):
     w = np.zeros(785)
     step = 0
     previous_w = w + EPS;
-    diag_G = np.zeros(785)
+    gradsSquares = np.zeros(785)
     while abs(logistic_loss(w, train_set) - logistic_loss(previous_w, train_set)) > EPS:
         np.random.shuffle(train_set)
         temp_position = 0
         previous_w = np.copy(w)
         step += 1
-        while temp_position + BUTCH_SIZE < len(train_set):
-            grad = logistic_grad(w, train_set[temp_position : temp_position + BUTCH_SIZE])
-            diag_G = GAMMA * diag_G + (1 - GAMMA) * np.square(grad)
-            grad = np.divide(grad, np.sqrt(diag_G) + EPS)
+        while temp_position + BATCH_SIZE < len(train_set):
+            grad = logistic_grad(w, train_set[temp_position : temp_position + BATCH_SIZE])
+            gradsSquares = GAMMA * gradsSquares + (1 - GAMMA) * np.square(grad)
+            grad = np.divide(grad, np.sqrt(gradsSquares) + EPS)
             w -= LMBD * grad
             
-            temp_position += BUTCH_SIZE
+            temp_position += BATCH_SIZE
     return w, step
 
 
@@ -726,21 +739,21 @@ def kaggle_RMSprop(train_set, BUTCH_SIZE, GAMMA, LMBD, EPS):
 LMBD = 1e-2
 EPS = 1e-5
 
-BUTCH_SIZE = 2000
+BATCH_SIZE = 2000
 testQuantity = 10
 averageSteps = []
 gammas = np.arange(0.05, 0.96, 0.05)
 for GAMMA in gammas:
-    w, stepCounter = kaggle_RMSprop(train_set, BUTCH_SIZE, GAMMA, LMBD, EPS)
+    w, stepCounter = kaggle_RMSprop(train_set, BATCH_SIZE, GAMMA, LMBD, EPS)
     mistakeCounter = count_mistakes(w, test_set)
     currentAverageSteps = 0
     for i in range(testQuantity) :
-        w, stepCounter = kaggle_RMSprop(train_set, BUTCH_SIZE, GAMMA, LMBD, EPS)
+        w, stepCounter = kaggle_RMSprop(train_set, BATCH_SIZE, GAMMA, LMBD, EPS)
         currentAverageSteps += stepCounter / testQuantity
     averageSteps.append(currentAverageSteps)
 
 plt.bar(np.array(gammas), averageSteps, color='g', width=0.03)
-plt.title("RMSProp, butch size is " + str(BUTCH_SIZE))
+plt.title("RMSProp, batch size is " + str(BATCH_SIZE))
 plt.show()
 
 
@@ -754,14 +767,14 @@ plt.show()
 # 
 # $\gamma_1$ отвечает за диагональнь матрицы G, $\gamma_2$ за сохранение импульса
 
-# In[369]:
+# In[24]:
 
-def kaggle_adam(train_set, BUTCH_SIZE, GAMMA1, GAMMA2, LMBD, EPS):
+def kaggle_adam(train_set, BATCH_SIZE, GAMMA1, GAMMA2, LMBD, EPS):
     w = np.zeros(train_set.shape[1] - 1)
     momentum = np.copy(w)
     step = 0
     previous_w = w + EPS;
-    diag_G = np.copy(w)
+    gradsSquares = np.copy(w)
     while abs(logistic_loss(w, train_set) - logistic_loss(previous_w, train_set)) > EPS:
         np.random.shuffle(train_set)
         temp_position = 0
@@ -769,20 +782,20 @@ def kaggle_adam(train_set, BUTCH_SIZE, GAMMA1, GAMMA2, LMBD, EPS):
         gamma1_t = GAMMA1
         gamma2_t = GAMMA2
         step += 1
-        while temp_position + BUTCH_SIZE < len(train_set):
-            grad = logistic_grad(w, train_set[temp_position : temp_position + BUTCH_SIZE])
-            diag_G = GAMMA1 * diag_G + (1 - GAMMA1) * np.square(grad)
-            diag_G_s = diag_G / (1 - gamma1_t)
+        while temp_position + BATCH_SIZE < len(train_set):
+            grad = logistic_grad(w, train_set[temp_position : temp_position + BATCH_SIZE])
+            gradsSquares = GAMMA1 * gradsSquares + (1 - GAMMA1) * np.square(grad)
+            gradsSquares_corrected = gradsSquares / (1 - gamma1_t)
             
             momentum = GAMMA2 * momentum + (1 - GAMMA2) * grad
-            momentum_s = momentum / (1 - gamma2_t)
+            momentum_corrected = momentum / (1 - gamma2_t)
             
-            grad = np.divide(momentum_s, np.sqrt(diag_G_s) + EPS)
+            grad = np.divide(momentum_corrected, np.sqrt(gradsSquares_corrected) + EPS)
             w -= LMBD * grad
             
             gamma1_t *= GAMMA1
             gamma2_t *= GAMMA2
-            temp_position += BUTCH_SIZE
+            temp_position += BATCH_SIZE
     return w, step
 
 
@@ -794,7 +807,7 @@ def kaggle_adam(train_set, BUTCH_SIZE, GAMMA1, GAMMA2, LMBD, EPS):
 import warnings
 warnings.filterwarnings('ignore')
 
-BUTCH_SIZE = 2500
+BATCH_SIZE = 2500
 LMBD = 1e-2
 EPS = 1e-5
 
@@ -804,13 +817,13 @@ MAX_STEPS = 50
 fig = plt.figure()
 ax = fig.add_subplot(111, autoscale_on=False, xlim=(0, 1.1), ylim=(0, 1.1))
 plt.ylabel("gamma1, momentum")
-plt.xlabel("gamma2, diagonal G")
+plt.xlabel("gamma2, squares of grads")
 plt.grid(True)
-plt.title("butch size is " + str(BUTCH_SIZE))
+plt.title("batch size is " + str(BATCH_SIZE))
 
 for GAMMA1 in (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9):
     for GAMMA2 in (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9):
-        w, stepCounter = kaggle_adam(train_set, BUTCH_SIZE, GAMMA1, GAMMA2, LMBD, EPS)
+        w, stepCounter = kaggle_adam(train_set, BATCH_SIZE, GAMMA1, GAMMA2, LMBD, EPS)
         RGBColor = (stepCounter / MAX_STEPS, 1. - (stepCounter / MAX_STEPS), 0.)
         plt.scatter(GAMMA1, GAMMA2, c=RGBColor, edgecolors='none', s=(7 * (MAX_STEPS - stepCounter)))
         ax.annotate(str(stepCounter), xy=(GAMMA1 - 0.02, GAMMA2 - 0.02))
@@ -825,32 +838,32 @@ plt.show()
 
 # Adadelta является модификацией adagrad'а, в котором коэффициент перед градиентом уменьшается постоянно (там у нас сумма квадратов, накапливающаяся с каждым шагом) и обучение сильно замедляется, Ададельта учитывает только несколько последних шагов (зависит от $\gamma$)
 
-# In[12]:
+# In[22]:
 
-def kaggle_adadelta(train_set, BUTCH_SIZE, GAMMA, EPS, EPS2):
+def kaggle_adadelta(train_set, BATCH_SIZE, GAMMA, EPS, EPS2):
     w = np.zeros(train_set.shape[1] - 1)
     step = 0
     previous_w = w + EPS;
-    e_G = 0
-    e_dw = 0
+    squaresOfGrads = 0
+    squaresOfUpdates = 0
     while abs(logistic_loss(w, train_set) - logistic_loss(previous_w, train_set)) > EPS:
         np.random.shuffle(train_set)
         temp_position = 0
         previous_w = np.copy(w)
         step += 1
-        while temp_position + BUTCH_SIZE < len(train_set):
+        while temp_position + BATCH_SIZE < len(train_set):
             grad = logistic_grad(w, train_set)
-            e_G = GAMMA * e_G + (1 - GAMMA) * np.sum(grad)
-            dw = np.sqrt(e_dw + EPS2) / np.sqrt(e_G) * grad
-            e_dw = GAMMA * e_dw + (1 - GAMMA) *np.sum(np.square(dw))
-            w -= dw
-            temp_position += BUTCH_SIZE
+            squaresOfGrads = GAMMA * squaresOfGrads + (1 - GAMMA) * np.sum(grad)
+            update = np.sqrt(squaresOfUpdates + EPS2) / np.sqrt(squaresOfGrads) * grad
+            squaresOfUpdates = GAMMA * squaresOfUpdates + (1 - GAMMA) * np.sum(np.square(update))
+            w -= update
+            temp_position += BATCH_SIZE
     return w, step
 TEST_SET_SIZE = 2500
 train_set, test_set = data[:-TEST_SET_SIZE], data[-TEST_SET_SIZE:]
-BUTCH_SIZE = 2000
+BATCH_SIZE = 2000
 EPS = 1e-5
-w, step = kaggle_adadelta(train_set, BUTCH_SIZE, 0.99, EPS, 1e-6)
+w, step = kaggle_adadelta(train_set, BATCH_SIZE, 0.99, EPS, 1e-6)
 mistakeCounter = count_mistakes(w, test_set)
 print( "Adadelta: ", mistakeCounter, "/", len(test_set), " mistakes, ", stepCounter, " steps")
 
