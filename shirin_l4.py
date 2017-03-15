@@ -1,16 +1,11 @@
 
 # coding: utf-8
 
-# In[15]:
+# In[1]:
 
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.preprocessing import Normalizer
-from sklearn import metrics
 from scipy import sparse
-from random import randint
-from collections import defaultdict
 
 import collections
 import math
@@ -35,22 +30,24 @@ tf.set_random_seed(50547)
 # 
 # Т.к. просто хочется посмотреть на обработанный таким образом текст и при перезапуске ядра не запускать достаточно длительную обработку снова, сохраняем полученный результат в файл
 
-# In[ ]:
+# In[19]:
+
+b'\xE2\x82\xAC'.decode('UTF-8')
+
+
+# In[21]:
 
 from gensim.corpora import WikiCorpus
-import logging
-import nltk
-from nltk.corpus import stopwords
 
 def parse_wiki(wiki_bz_file):
-    output = open('./wiki_text_dump.txt', 'w')
-    wiki = WikiCorpus(wiki_bz_file, lemmatize=False)
-    wiki.dictionary.filter_extremes(10, 0.2, 60000)
-    voc = set(wiki.dictionary.values())
-    for text in wiki.get_texts():
-        text = [w for w in text if w in voc]
-        output.write(" ".join(text) + "\n")
-    output.close()
+    with open('./wiki_text_dump_m2.txt', 'w') as output:
+        wiki = WikiCorpus(wiki_bz_file, lemmatize=False)
+        wiki.dictionary.filter_extremes(10, 0.2, 60000)
+        voc = set(wiki.dictionary.values())
+        for text in wiki.get_texts():
+            text = [w.decode('UTF-8') for w in text if w.decode('UTF-8') in voc]
+            output.write(" ".join(text) + "\n")
+        del wiki
     return
 
 parse_wiki("./simplewiki-20170201-pages-articles.xml.bz2")
@@ -58,15 +55,14 @@ parse_wiki("./simplewiki-20170201-pages-articles.xml.bz2")
 
 # Пользуемся библиотечными функциями для построения модели мешка слов с использованием метрики tf-idf, заодно бесплатно получаем словари (индекс-слово и слово-индекс). Я выбрал tf-idf метрку, т.к. мне кажется, что из предложенных в ней содержится максимум информации и расстояния между различными документами и словами интепретируются четче
 
-# In[4]:
+# In[7]:
 
-dump = open('wiki_text_dump.txt', 'r')
-tfidf_maker = TfidfVectorizer(use_idf=True)
-tfidf_matrix = tfidf_maker.fit_transform(dump)
-dump.close()
+with open('wiki_text_dump.txt', 'r') as dump:
+    tfidf_maker = TfidfVectorizer(use_idf=True)
+    tfidf_matrix = tfidf_maker.fit_transform(dump)
 
 
-# In[5]:
+# In[8]:
 
 vocabulary_size = tfidf_matrix.shape[1]
 direct_dict = tfidf_maker.vocabulary_
@@ -96,7 +92,7 @@ np.save('lsa', lsa_embedding)
 
 # Сохраняем результат, чтобы не пересчитывать в дальнейшем
 
-# In[40]:
+# In[2]:
 
 lsa_embedding = np.load('lsa.npy')
 
@@ -296,13 +292,11 @@ metrics_comparison('guitar', lsa_embedding, 10)
 
 # In[7]:
 
-dump = open('wiki_text_dump.txt', 'r')
-data = []
-for string in dump:
-    for word in string.split():
-        if word in direct_dict.keys():
+with open('wiki_text_dump.txt', 'r') as dump:
+    data = []
+    for string in dump:
+        for word in string.split():
             data.append(direct_dict[word])
-dump.close()
 
 
 # Длина нашего текста
@@ -425,7 +419,7 @@ with tf.Session(graph=w2v_graph) as session:
 np.save('w2v', w2v_embedding)
 
 
-# In[163]:
+# In[3]:
 
 w2v_embedding = np.load('w2v.npy')
 
@@ -703,7 +697,7 @@ with tf.Session(graph=glove_graph) as session:
 np.save('glove', glove_embedding)
 
 
-# In[8]:
+# In[4]:
 
 glove_embedding = np.load('glove.npy')
 
@@ -719,7 +713,7 @@ analogy_k_nearest('king', 'man', 'woman', glove_embedding, 10, 'cosine')
 
 # Перепишем функцию поиска ближайшего слова так, чтобы она не выводила результат, а просто возвращала его.
 
-# In[12]:
+# In[5]:
 
 def find_k_nearest(word1, word2, word3, embedding_matrix, k, metric):
     word1_vector = embedding_matrix[direct_dict[word1]]
@@ -742,77 +736,79 @@ def find_k_nearest(word1, word2, word3, embedding_matrix, k, metric):
 # In[13]:
 
 with open('questions-words.txt', 'r') as questions:
-    questions_2 = open('quest_list.txt', 'w')
+    with open('quest_list.txt', 'w') as questions_2:
+        for question in questions:
+            if (random.random() < 0.1):
+                print(question.lower(), file=questions_2, end='')
+
+
+# In[11]:
+
+with open('quest_list.txt', 'r') as questions:
+    check = " \033[1;32;0m✓\033[0m |"
+    cross = " \033[1;31;0m×\033[0m |"
+    right = 0
+    total = 0
+    lsa_cos_score = 0
+    lsa_euc_score = 0
+    w2v_cos_score = 0
+    w2v_euc_score = 0
+    glv_cos_score = 0
+    glv_euc_score = 0
     for question in questions:
-        if (random.random() < 0.1):
-            print(question.lower(), file=questions_2, end='')
-    questions_2.close()
+        words = question.split()
+        if (words[0] not in direct_dict.keys() or
+            words[1] not in direct_dict.keys() or
+            words[2] not in direct_dict.keys() or
+            words[3] not in direct_dict.keys()):
+            continue
+        if total % 15 == 0:
+            print(" " * 68,"|l/c|l/e|w/c|w/e|g/c|g/e|")
+        total += 1
+        print("%4d |%14s -%14s +%14s =%14s |" % (total, words[0], words[1], words[3], words[2]), end='')
 
+        if (words[2] in find_k_nearest(words[0], words[1], words[3], lsa_embedding, 10, 'cosine')):
+            print(check, end='')
+            lsa_cos_score += 1
+        else:
+            print(cross, end='')
 
-# In[111]:
+        if (words[2] in find_k_nearest(words[0], words[1], words[3], lsa_embedding, 10, 'euclidean')):
+            print(check, end='')
+            lsa_euc_score += 1
+        else:
+            print(cross, end='')
 
-questions = open('quest_list.txt', 'r')
-right = 0
-total = 0
-lsa_cos_score = 0
-lsa_euc_score = 0
-w2v_cos_score = 0
-w2v_euc_score = 0
-glv_cos_score = 0
-glv_euc_score = 0
-for question in questions:
-    words = question.split()
-    if (words[0] not in direct_dict.keys() or
-        words[1] not in direct_dict.keys() or
-        words[2] not in direct_dict.keys() or
-        words[3] not in direct_dict.keys()):
-        continue
-    if total % 15 == 0:
-        print(" " * 68,"|lsa,c|lsa,e|w2v,c|w2v,e|glv,c|glv,e|")
-    total += 1
-    print("%4d |%14s -%14s +%14s =%14s |" % (total, words[0], words[1], words[3], words[2]), end='')
-    if (words[2] in find_k_nearest(words[0], words[1], words[3], lsa_embedding, 10, 'cosine')):
-        print("  \033[1;32;0m✓\033[0m  |", end='')
-        lsa_cos_score += 1
-    else:
-        print("  \033[1;31;0m×\033[0m  |", end='')
-    
-    if (words[2] in find_k_nearest(words[0], words[1], words[3], lsa_embedding, 10, 'euclidean')):
-        print("  \033[1;32;0m✓\033[0m  |", end='')
-        lsa_euc_score += 1
-    else:
-        print("  \033[1;31;0m×\033[0m  |", end='')
-    
-    if (words[2] in find_k_nearest(words[0], words[1], words[3], w2v_embedding, 10, 'cosine')):
-        print("  \033[1;32;0m✓\033[0m  |", end='')
-        w2v_cos_score += 1
-    else:
-        print("  \033[1;31;0m×\033[0m  |", end='')
-    
-    if (words[2] in find_k_nearest(words[0], words[1], words[3], w2v_embedding, 10, 'euclidean')):
-        print("  \033[1;32;0m✓\033[0m  |", end='')
-        w2v_euc_score += 1
-    else:
-        print("  \033[1;31;0m×\033[0m  |", end='')
-    
-    if (words[2] in find_k_nearest(words[0], words[1], words[3], glove_embedding, 10, 'cosine')):
-        print("  \033[1;32;0m✓\033[0m  |", end='')
-        glv_cos_score += 1
-    else:
-        print("  \033[1;31;0m×\033[0m  |", end='')
-    
-    if (words[2] in find_k_nearest(words[0], words[1], words[3], glove_embedding, 10, 'euclidean')):
-        print("  \033[1;32;0m✓\033[0m  |")
-        glv_euc_score += 1
-    else:
-        print("  \033[1;31;0m×\033[0m  |")
-print(" " * 68, "|%5d|%5d|%5d|%5d|%5d|%5d|" % (lsa_cos_score, 
-                                               lsa_euc_score,
-                                               w2v_cos_score,
-                                               w2v_euc_score,
-                                               glv_cos_score,
-                                               glv_euc_score))
-questions.close()
+        if (words[2] in find_k_nearest(words[0], words[1], words[3], w2v_embedding, 10, 'cosine')):
+            print(check, end='')
+            w2v_cos_score += 1
+        else:
+            print(cross, end='')
+
+        if (words[2] in find_k_nearest(words[0], words[1], words[3], w2v_embedding, 10, 'euclidean')):
+            print(check, end='')
+            w2v_euc_score += 1
+        else:
+            print(cross, end='')
+
+        if (words[2] in find_k_nearest(words[0], words[1], words[3], glove_embedding, 10, 'cosine')):
+            print(check, end='')
+            glv_cos_score += 1
+        else:
+            print(cross, end='')
+
+        if (words[2] in find_k_nearest(words[0], words[1], words[3], glove_embedding, 10, 'euclidean')):
+            print(check)
+            glv_euc_score += 1
+        else:
+            print(cross)
+
+    print(" " * 68, "|%3d|%3d|%3d|%3d|%3d|%3d|" % (lsa_cos_score, 
+                                                   lsa_euc_score,
+                                                   w2v_cos_score,
+                                                   w2v_euc_score,
+                                                   glv_cos_score,
+                                                   glv_euc_score))
 
 
 # В принципе ни одна модель вау-эффекта не произвела, хотя больше всего мне понравилась GloVe - скоростью обучения, естественностью и точностью. Хуже всего себя показала LSA - но она и самая примитивная модель, практически не имеющая параметров. Word2vec и GloVe показали себя лучше, а также они имеют огромный потенциал в вариациях параметров обучения, который я не раскрыл (нужно намного больше эксперементировать с данными моделями, чтобы чувствовать правильные параметры), да и датасет я выбрал совсем небольшой.
@@ -852,14 +848,13 @@ from mpl_toolkits.mplot3d import Axes3D
 import pylab
 fig = pylab.figure(figsize=(10,7))
 ax = Axes3D(fig)
-to_tsne = open('to_tsne.txt', 'r')
-for string in to_tsne:
-    for word in string.split():
-        added_words.index(word)
-        x, y, z = low_dim_embs[added_words.index(word)]
-        ax.scatter(x, y, z,c='b', s=5) 
-        ax.text(x, y, z, word, size=10, zorder=1, color='k')
-to_tsne.close()
+with open('to_tsne.txt', 'r') as to_tsne:
+    for string in to_tsne:
+        for word in string.split():
+            added_words.index(word)
+            x, y, z = low_dim_embs[added_words.index(word)]
+            ax.scatter(x, y, z,c='b', s=5) 
+            ax.text(x, y, z, word, size=10, zorder=1, color='k')
 fig.savefig('tsne')
 ax.axis('off')
 pylab.show()
