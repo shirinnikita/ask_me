@@ -18,8 +18,8 @@
 3) [Keras_tqdm](http://jupyter.readthedocs.io/en/latest/install.html) - альтернативная визуализация логов при обучении модели
 4) Обученная модель [GloVe](http://nlp.stanford.edu/data/glove.6B.zip). Файл glove.6B.50d.txt должен быть в папке ask-me-app. Чтобы использовать другую версию, следуйте инструкциям ноутбука.
 5) [Jupyter Notebook] (http://jupyter.readthedocs.io/en/latest/install.html)
-Для того, чтобы обучить модель без изменений, откройте 'build_weights.ipynb', содержащий инструкции, с помощью Jupyter Notebook и просто запустите все ячейки
-В итоге получите файлы 'vocabulary.pkl' и 'weights.h5', используемые в следующей части
+Для того, чтобы обучить модель без изменений, откройте `build_weights.ipynb`, содержащий инструкции, с помощью Jupyter Notebook и просто запустите все ячейки
+В итоге получите файлы `vocabulary.pkl` и `weights.h5`, используемые в следующей части
 Для запуска приложения-сервера понадобятся:
 1) Keras 2.0, Tensorflow 1.0
 2) [Flask](http://flask.pocoo.org/docs/0.12/installation/) - веб-сервер на python
