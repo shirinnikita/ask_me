@@ -23,4 +23,7 @@
 1) Keras 2.0, Tensorflow 1.0
 2) Flask - веб-сервер на python
 3) Файлы vocabulary.pkl и weights.h5
-Для запуска веб-сервера выполните ~~~~$python3 app.py~~~~
+Для запуска веб-сервера выполните:
+~~~~
+$python3 app.py
+~~~~
