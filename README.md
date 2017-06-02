@@ -16,7 +16,7 @@
 1) Python 3.5
 2) [Keras 2.0](https://keras.io/#installation), [Tensorflow 1.0](https://www.tensorflow.org/install/) - библиотеки для машинного обучения (вместе с зависимостями)
 3) [Keras_tqdm](http://jupyter.readthedocs.io/en/latest/install.html) - альтернативная визуализация логов при обучении модели
-4) Обученная модель [GloVe](http://nlp.stanford.edu/data/glove.6B.zip). Файл glove.6B.50d.txt должен быть в папке ask-me-app. Чтобы использовать другую версию, следуйте инструкциям ноутбука.
+4) Обученная модель [GloVe](http://nlp.stanford.edu/data/glove.6B.zip). Файл `glove.6B.50d.txt` должен быть в папке `ask-me-app`. Чтобы использовать другую версию, следуйте инструкциям ноутбука.
 5) [Jupyter Notebook] (http://jupyter.readthedocs.io/en/latest/install.html)
 Для того, чтобы обучить модель без изменений, откройте `build_weights.ipynb`, содержащий инструкции, с помощью Jupyter Notebook и просто запустите все ячейки
 В итоге получите файлы `vocabulary.pkl` и `weights.h5`, используемые в следующей части
