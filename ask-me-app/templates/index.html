@@ -1,11 +1,14 @@
 <!doctype html>
-<title>Example</title>
+<head>
+<title>Ask me</title>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
         rel="stylesheet">
 <script type=text/javascript>
   $(function() {
-    $('a#calculate').bind('click', function() {
+    $('button#calculate').bind('click', function() {
       $.getJSON('/_compute_answer', {
         context: $('#context').val(),
         question: $('#question').val()
@@ -26,9 +29,12 @@ body {
     flex-direction: row;
     margin: 0;
   }
+  h2 {
+    color: #7E97B3;
+  }
 .menu-container {
   display: flex;
-  background: yellow;
+  background: #C2D8EF; /*OK*/
   flex-direction: column;
 
   justify-content: flex-start;
@@ -48,14 +54,16 @@ body {
 }
 
 .element {
+  color: white;
   display: flex;
-  background: brown;
+  background: #F6A700 ;
+  margin-top: 5px;
     flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 .main-container {
-  background: blue;
+  background: #EEEEEE;
   display: flex;
     flex-direction: column;
   justify-content: center;
@@ -64,7 +72,7 @@ body {
     min-height: 60vh;
 }
 .flex-item {
-  background: tomato;
+  background: #F6A700; /*OK*/
   padding: 5px;
   width: 28vw;
   margin-top: 10px;
@@ -74,88 +82,57 @@ body {
   text-align: left;
 }
 header, footer {
-    background: yellowgreen;
-    height: 20vh;
+    color: #C2D7EF;
+    text-align: center;
+       padding-top: 3vw;
+    /*   text-transform: uppercase;*/
+   padding-left: 2vh;
+    font-size: 24pt;
+    font-weight: bold;
+    background: #5867A2;
+    height: 15vh;
   }
   </style>
 <body>
-  <div class="menu-container">
-    <div class="flex-item">2</div>
+    <div class="menu-container">
     <div class="flex-item"><center>Task 1</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='John travelled to the garden. John journeyed to the kitchen.';">John travelled to the garden. John journeyed to the kitchen.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Where is John?';">Where is John?</a><br>Answer: <i>kitchen</i></div>
-    <div class="flex-item">4</div>
-    <div class="flex-item">5</div>
-    <div class="flex-item">6</div>
-    <div >1</div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-     <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-    <div >1</div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-     <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-    <div >1</div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-      <div >4</div>
-    <div >5</div>
-    <div >6</div>
-    <div >1</div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-     <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-    <div >1</div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-     <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
-    <div >1</div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div >5</div>
-    <div >6</div>
+
+    <div class="flex-item"><center>Task 4</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='The hallway is south of the office. The bathroom is north of the office.';">The hallway is south of the office. The bathroom is north of the office.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='What is north of the office?';">What is north of the office?</a><br>Answer: <i>bathroom</i></div>
+
+    <div class="flex-item"><center>Task 5</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Fred journeyed to the bedroom. Fred got the milk there. Fred went back to the kitchen. Bill picked up the football there. Fred handed the milk to Mary. Mary moved to the garden.';">Fred journeyed to the bedroom. Fred got the milk there. Fred went back to the kitchen. Bill picked up the football there. Fred handed the milk to Mary. Mary moved to the garden.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Who received the milk?';">Who received the milk?</a><br>Answer: <i>mary</i></div>
+
+    <div class="flex-item"><center>Task 6</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary went to the bathroom. Daniel took the football there.';">Mary went to the bathroom. Daniel took the football there.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Is Mary in the kitchen?';">Is Mary in the kitchen?</a><br>Answer: <i>no</i></div>
+
+    <div class="flex-item"><center>Task 7</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Sandra travelled to the bedroom. John travelled to the bathroom. John picked up the football there. John took the milk there.';">Sandra travelled to the bedroom. John travelled to the bathroom. John picked up the football there. John took the milk there.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='How many objects is John carrying?';">How many objects is John carrying?</a><br>Answer: <i>two</i></div>
+
+    <div class="flex-item"><center>Task 8</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary took the milk there. Mary went to the office. Mary took the apple there. Sandra journeyed to the bedroom.';">Mary took the milk there. Mary went to the office. Mary took the apple there. Sandra journeyed to the bedroom.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='What is Mary carrying?';">What is Mary carrying?</a><br>Answer: <i>milk,apple</i></div>
+     <div class="flex-item"><center>Task 9</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary is in the bathroom. Sandra journeyed to the hallway. John journeyed to the office. Mary is in the kitchen.';">Mary is in the bathroom. Sandra journeyed to the hallway. John journeyed to the office. Mary is in the kitchen.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Is Mary in the bathroom?';">Is Mary in the bathroom?</a><br>Answer: <i>no</i></div>
+
+
+    <div class="flex-item"><center>Task 10</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary travelled to the kitchen. Fred is in the school. Fred went back to the office. Julie is either in the park or the office. Fred is either in the school or the bedroom. Julie journeyed to the bedroom.';">Mary travelled to the kitchen. Fred is in the school. Fred went back to the office. Julie is either in the park or the office. Fred is either in the school or the bedroom. Julie journeyed to the bedroom.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Is Fred in the school?';">Is Fred in the school?</a><br>Answer: <i>maybe</i></div>
+    <div class="flex-item"><center>Task 11</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary moved to the bathroom. Following that she travelled to the garden. John went to the garden. Then he journeyed to the bedroom. Mary travelled to the bathroom. Following that she moved to the office.';">Mary moved to the bathroom. Following that she travelled to the garden. John went to the garden. Then he journeyed to the bedroom. Mary travelled to the bathroom. Following that she moved to the office.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Where is Mary?';">Where is Mary?</a><br>Answer: <i>office</i></div>
+    <div class="flex-item"><center>Task 12</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary and John moved to the garden. Daniel and Sandra went back to the bedroom.';">Mary and John moved to the garden. Daniel and Sandra went back to the bedroom.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Where is Mary?';">Where is Mary?</a><br>Answer: <i>garden</i></div>
+    <div class="flex-item"><center>Task 13</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mary and Daniel went to the bathroom. Then they journeyed to the hallway. Sandra and John moved to the kitchen. Then they moved to the hallway. Daniel and Sandra journeyed to the office. Then they moved to the bedroom.';">Mary and Daniel went to the bathroom. Then they journeyed to the hallway. Sandra and John moved to the kitchen. Then they moved to the hallway. Daniel and Sandra journeyed to the office. Then they moved to the bedroom.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Where is John?';">Where is John? </a><br>Answer: <i>hallway</i></div>
+    <div class="flex-item"><center>Task 14</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='This morning Mary moved to the kitchen. This afternoon Mary moved to the cinema. Yesterday Bill went to the bedroom. Yesterday Mary journeyed to the school.';">This morning Mary moved to the kitchen. This afternoon Mary moved to the cinema. Yesterday Bill went to the bedroom. Yesterday Mary journeyed to the school.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Where was Mary before the cinema?';">Where was Mary before the cinema?</a><br>Answer: <i>kitchen</i></div>
+    <div class="flex-item"><center>Task 15</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Mice are afraid of cats. Gertrude is a mouse. Emily is a mouse. Wolves are afraid of sheep. Winona is a wolf. Jessica is a mouse. Cats are afraid of sheep. Sheep are afraid of cats.';">Mice are afraid of cats. Gertrude is a mouse. Emily is a mouse. Wolves are afraid of sheep. Winona is a wolf. Jessica is a mouse. Cats are afraid of sheep. Sheep are afraid of cats.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='What is jessica afraid of?';">What is jessica afraid of? </a><br>Answer: <i>cat</i></div>
+
+    <div class="flex-item"><center>Task 16</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Lily is a rhino. Brian is a lion. Lily is gray. Bernhard is a lion. Julius is a swan. Brian is gray. Greg is a rhino. Julius is white. Greg is yellow.';">Lily is a rhino. Brian is a lion. Lily is gray. Bernhard is a lion. Julius is a swan. Brian is gray. Greg is a rhino. Julius is white. Greg is yellow.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='What color is Bernhard?';">What color is Bernhard?</a><br>Answer: <i>gray</i></div>
+    <div class="flex-item"><center>Task 17</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='The triangle is above the pink rectangle. The blue square is to the left of the triangle.';">MThe triangle is above the pink rectangle. The blue square is to the left of the triangle.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Is the pink rectangle to the right of the blue square?';">Is the pink rectangle to the right of the blue square?</a><br>Answer: <i>yes</i></div>
+    <div class="flex-item"><center>Task 18</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='The box of chocolates fits inside the chest. The box is bigger than the chest. The box is bigger than the suitcase. The suitcase fits inside the box. The container is bigger than the box of chocolates.';">MThe box of chocolates fits inside the chest. The box is bigger than the chest. The box is bigger than the suitcase. The suitcase fits inside the box. The container is bigger than the box of chocolates.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Does the box fit in the box of chocolates?';">Does the box fit in the box of chocolates?</a><br>Answer: <i>no</i></div>
+    <div class="flex-item"><center>Task 19</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='The bedroom is south of the kitchen. The bathroom is north of the kitchen. The office is south of the garden. The hallway is east of the bathroom. The kitchen is west of the garden.';">The bedroom is south of the kitchen. The bathroom is north of the kitchen. The office is south of the garden. The hallway is east of the bathroom. The kitchen is west of the garden.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='How do you go from the bathroom to the garden?';"> How do you go from the bathroom to the garden?</a><br>Answer: <i>s,e</i></div>
+    <div class="flex-item"><center>Task 20</center><br>Context: <a style="cursor:pointer;" onclick="document.getElementById('context').value='Antoine is tired. Sumit is thirsty. Jason is hungry. Jason moved to the kitchen. Jason grabbed the apple there. Antoine went back to the bedroom.';">Antoine is tired. Sumit is thirsty. Jason is hungry. Jason moved to the kitchen. Jason grabbed the apple there. Antoine went back to the bedroom.</a><br>Question: <a style="cursor:pointer;" onclick="document.getElementById('question').value='Why did antoine go to the bedroom?';">Why did antoine go to the bedroom?</a><br>Answer: <i>tired</i></div>
   </div>
   <div class="right-container">
-  <header>HEADER</header>
+  <header>Ask Me Anything DMN model trained on bAbi tasks</header>
   <div class="main-container">
-    <h1>CONTEXT</h1>
+    <h2>Context</h1>
     <textarea type="text" id="context" rows="10" cols="60"></textarea> 
-        <h1>QUESTION</h1>
+        <h2>Question</h1>
 
     <textarea style="overflow: hidden; resize: none" type="text" id="question" rows="1" cols="60"></textarea>
-    <a href="javascript:void();" id="calculate" class="element">calculate server side</a>
-    <span id="result" style="color: red; font-size: 2em">?</span>
+    <button  href="javascript:void();" id="calculate" class="element">See answer</button>
+    <h2><span id="result">?</span></h2>
   </div> 
-  <footer>FOOTER</footer>
+  <footer></footer>
   </div>
 </body>
